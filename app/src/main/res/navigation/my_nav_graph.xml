@@ -2,10 +2,17 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/my_nav_graph"
-    app:startDestination="@id/formFragment">
+    app:startDestination="@id/contactsFragment">
+
+    <!--<fragment
+        android:id="@+id/formFragment"
+        android:name="com.example.myapplicationcompose.info.view.FormFragment" >
+        <action
+            android:id="@+id/action_formFragment_to_contactsFragment"
+            app:destination="@id/contactsFragment" />
+    </fragment>-->
 
     <fragment
-        android:id="@+id/formFragment"
-        android:name="com.example.myapplicationcompose.info.view.FormFragment"
-        android:label="FormFragment" />
+        android:id="@+id/contactsFragment"
+        android:name="com.example.myapplicationcompose.info.view.FormFragment" />
 </navigation>

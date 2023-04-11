@@ -1,0 +1,24 @@
+{
+    "saldo_atual": 32492.81,
+    "nome": "Francisco Diógenes Perdão",
+    "meus_contatos": {
+        "qtd": 15,
+        "lista": [
+            {"id": 1120, "nome_completo": "Miguel Davi dos Anjos Mota", "dados_bancarios": { "agencia": 1, "conta_corrente": 123 }},
+            {"id": 1121, "nome_completo": "Sophia Maria", "dados_bancarios": { "agencia": 3, "conta_corrente": 245 }},
+            {"id": 5222, "nome_completo": "Heitor Lúcio Terno", "dados_bancarios": { "agencia": 15, "conta_corrente": 123 }},
+            {"id": 1123, "nome_completo": "Alice dos Santos Gomes", "dados_bancarios": { "agencia": 23, "conta_corrente": 9123 }},
+            {"id": 4124, "nome_completo": "Isabella do Nascimento", "dados_bancarios": { "agencia": 54, "conta_corrente": 72345 }},
+            {"id": 1125, "nome_completo": "Heitor Petri Araújo", "dados_bancarios": { "agencia": 76, "conta_corrente": 542 }},
+            {"id": 1126, "nome_completo": "Giovanna de Castro Neta", "dados_bancarios": { "agencia": 8797, "conta_corrente": 167 }},
+            {"id": 1127, "nome_completo": "João Pedro Bitencour", "dados_bancarios": { "agencia": 1465, "conta_corrente": 987 }},
+            {"id": 1128, "nome_completo": "Yasmin Pereira", "dados_bancarios": { "agencia": 4, "conta_corrente": 557 }},
+            {"id": 1222, "nome_completo": "Benjamin Litros Silva", "dados_bancarios": { "agencia": 6, "conta_corrente": 223 }},
+            {"id": 1129, "nome_completo": "Joaquim Teixeira", "dados_bancarios": { "agencia": 10, "conta_corrente": 6 }},
+            {"id": 1130, "nome_completo": "Fernanda Trono Ribeiro", "dados_bancarios": { "agencia": 1, "conta_corrente": 3321 }},
+            {"id": 1131, "nome_completo": "Davi Mota dos Anjos", "dados_bancarios": { "agencia": 1021, "conta_corrente": 10020 }},
+            {"id": 1332, "nome_completo": "Agatha Raijhon de Paula", "dados_bancarios": { "agencia": 1594, "conta_corrente": 16452 }},
+            {"id": 1133, "nome_completo": "Otávio Lara Junior", "dados_bancarios": { "agencia": 1111, "conta_corrente": 53241 }}
+        ]
+    }
+}

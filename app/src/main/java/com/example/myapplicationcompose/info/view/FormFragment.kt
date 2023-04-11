@@ -22,6 +22,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.ui.components.InputComponents
 import com.example.myapplicationcompose.ui.theme.BookSm
@@ -141,7 +142,7 @@ class FormFragment : Fragment() {
                 placeholder = "Toque para selecionar o contato",
                 trailingIcon = R.drawable.ic_launcher_foreground
             ) {
-                // TODO: abrir a tela para selecionar contatos
+                //findNavController().navigate(R.id.action_formFragment_to_contactsFragment)
                 contactName = "Fulano de Tal"
             }
 
