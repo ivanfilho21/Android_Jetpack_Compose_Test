@@ -11,4 +11,8 @@
     <color name="indicator_color">#416AA7</color>
     <color name="white">#F6F6F6</color>
     <color name="placeholder">#CBCBCB</color>
+    <color name="dark_green">#16553C</color>
+    <color name="light_green_2">#C4E49F</color>
+    <color name="gray_light_primary">#E0E0E0</color>
+    <color name="gray_dark_primary">#CBCBCB</color>
 </resources>

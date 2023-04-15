@@ -55,3 +55,8 @@ val BoldSm = Bold.copy(
     fontSize = 14.sp,
     lineHeight = 16.sp
 )
+
+val BoldSt = Bold.copy(
+    fontSize = 16.sp,
+    lineHeight = 18.sp
+)
