@@ -1,5 +1,7 @@
 package com.example.myapplicationcompose.ui.components
 
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,45 +18,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.ui.theme.BoldSm
+import com.example.myapplicationcompose.ui.theme.BookSm
 import com.example.myapplicationcompose.ui.theme.BookSt
-import com.example.myapplicationcompose.utils.MonetaryFormatHelper
 
 object InputComponents {
-    data class InputType(
-        val keyboardType: KeyboardType = KeyboardType.Text
+    data class InputOptions(
+        val keyboardType: KeyboardType = KeyboardType.Text,
+        val validator: InputValidator? = null,
+        val validatorDelay: Long = 1000,
+        val pattern: Regex? = null
     )
-
-    class MonetaryTransformation : VisualTransformation {
-        private val suffix = "R$ "
-
-        override fun filter(text: AnnotatedString): TransformedText {
-            val amount = MonetaryFormatHelper.format(text.text.toDouble() / 100)
-
-            // TODO: continuar tratando
-
-            return TransformedText(
-                text = AnnotatedString(suffix + amount),
-                offsetMapping = object : OffsetMapping {
-                    override fun originalToTransformed(offset: Int): Int {
-                        return offset + suffix.length
-                    }
-
-                    override fun transformedToOriginal(offset: Int): Int {
-                        return offset - suffix.length
-                    }
-                }
-            )
-        }
-
-    }
 
     @Composable
     fun AppInputSelectable(
@@ -86,34 +64,62 @@ object InputComponents {
         indicatorColor: Color? = null,
         singleLine: Boolean = true,
         visible: Boolean = true,
-        inputType: InputType = InputType()
+        inputOptions: InputOptions = InputOptions()
     ) {
         TitleAndComponent(title, visible) {
-            var inputText by remember { mutableStateOf(text) }
+            var mutableText by remember { mutableStateOf(text) }
+            val mutableValidator by remember { mutableStateOf(inputOptions.validator) }
+            var mutableHelperVisibility by remember { mutableStateOf(false) }
             val strokeColor = indicatorColor ?: colorResource(id = R.color.indicator_color)
-
-            val visualTransformation =
-                if (inputText.isEmpty()) VisualTransformation.None else MonetaryTransformation()
 
             // Basic Text Field
             BasicTextField(
-                value = inputText,
-                onValueChange = { value -> inputText = value },
-                visualTransformation = visualTransformation,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = inputType.keyboardType),
+                value = mutableText,
+                onValueChange = { value ->
+                    mutableValidator?.let { validator ->
+                        mutableHelperVisibility = false
+
+                        if (!validator.validate(value)) {
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                mutableHelperVisibility = true
+                            }, inputOptions.validatorDelay)
+                        }
+                    }
+
+                    mutableText = value
+                },
+                visualTransformation = VisualTransformation.None,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = inputOptions.keyboardType),
                 modifier = Modifier.padding(top = 8.dp),
                 textStyle = BookSt.copy(color = colorResource(id = R.color.primary_text)),
                 singleLine = singleLine,
                 cursorBrush = SolidColor(strokeColor),
                 decorationBox = { innerTextField ->
                     InputDecorationBox(
-                        inputText,
+                        mutableText,
                         placeholder,
                         trailingIcon,
                         strokeColor,
                         innerTextField
                     )
                 }
+            )
+
+            // Helper Text
+            val helperText = mutableValidator?.errorMessage ?: ""
+
+            if (!mutableHelperVisibility || helperText.isEmpty()) {
+                return@TitleAndComponent
+            }
+
+            Text(
+                text = helperText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                style = BookSm.copy(
+                    color = colorResource(id = R.color.dark_red)
+                )
             )
         }
     }

@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="light_green">#78C2A4</color>
     <color name="primary_text">#16553C</color>
+    <color name="dark_red">#D43838</color>
     <color name="indicator_color">#416AA7</color>
     <color name="white">#F6F6F6</color>
     <color name="placeholder">#CBCBCB</color>

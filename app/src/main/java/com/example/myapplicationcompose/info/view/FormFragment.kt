@@ -28,13 +28,22 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.myapplicationcompose.R
+import com.example.myapplicationcompose.info.view_model.ContactsViewModel
 import com.example.myapplicationcompose.ui.components.InputComponents
-import com.example.myapplicationcompose.ui.theme.*
+import com.example.myapplicationcompose.ui.components.InputValidator
+import com.example.myapplicationcompose.ui.components.padZero
+import com.example.myapplicationcompose.ui.theme.BoldSt
+import com.example.myapplicationcompose.ui.theme.BookSm
+import com.example.myapplicationcompose.ui.theme.MediumLg
+import com.example.myapplicationcompose.ui.theme.MyApplicationComposeTheme
 import java.util.*
 
 class FormFragment : Fragment() {
+    private lateinit var actionButtonState: MutableState<Boolean>
+    private val viewModel by activityViewModels<ContactsViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,6 +53,7 @@ class FormFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 MyApplicationComposeTheme {
+                    actionButtonState = remember { mutableStateOf(false) }
                     FormLayout()
                 }
             }
@@ -71,7 +81,7 @@ class FormFragment : Fragment() {
             }
 
             Button(
-                enabled = false, // TODO: Rever
+                enabled = actionButtonState.value,
                 onClick = {
                     // TODO: ir para a tela de Comprovante
                 },
@@ -146,18 +156,31 @@ class FormFragment : Fragment() {
                 title = "Valor da transferência",
                 placeholder = "Digite a quantidade",
                 trailingIcon = R.drawable.ic_baseline_attach_money_24,
-                inputType = InputComponents.InputType(KeyboardType.Number),
+                inputOptions = InputComponents.InputOptions(
+                    keyboardType = KeyboardType.NumberPassword,
+                    validatorDelay = 0,
+                    validator = InputValidator.Builder()
+                        .setRequired(true, "Campo obrigatório.")
+                        .addCustomValidation("Digite pelo menos três dígitos.") { text ->
+                            text.length >= 3
+                        }
+                        .addCustomValidation("Digite no máximo 5 dígitos.") { text ->
+                            text.length <= 5
+                        }
+                        .setOnValidationCallback { valid ->
+                            actionButtonState.value = valid
+                        }
+                        .build(),
+                    pattern = Regex("^\\d+$")),
             )
 
-            var contactName: String by remember { mutableStateOf("") }
             InputComponents.AppInputSelectable(
                 title = "Transferir para",
-                text = contactName,
+                text = viewModel.selectedContact.value,
                 placeholder = "Toque para selecionar o contato",
                 trailingIcon = R.drawable.ic_baseline_account_circle_24
             ) {
                 findNavController().navigate(R.id.action_formFragment_to_contactsFragment)
-                contactName = "Fulano de Tal"
             }
 
             val checkedState: MutableState<Boolean> = remember { mutableStateOf(false) }
@@ -206,6 +229,3 @@ class FormFragment : Fragment() {
     }
 
 }
-
-private fun Int?.padZero(length: Int) =
-    this?.toString()?.padStart(length, '0') ?: "0".repeat(length)
