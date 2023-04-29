@@ -2,13 +2,17 @@ package com.example.myapplicationcompose.info.view
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -21,7 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -29,9 +35,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.info.view_model.ContactsViewModel
+import com.example.myapplicationcompose.info.view_model.DataViewModel
+import com.example.myapplicationcompose.info.view_model.TransferViewModel
 import com.example.myapplicationcompose.ui.components.InputComponents
 import com.example.myapplicationcompose.ui.components.InputValidator
 import com.example.myapplicationcompose.ui.components.padZero
@@ -39,11 +48,15 @@ import com.example.myapplicationcompose.ui.theme.BoldSt
 import com.example.myapplicationcompose.ui.theme.BookSm
 import com.example.myapplicationcompose.ui.theme.MediumLg
 import com.example.myapplicationcompose.ui.theme.MyApplicationComposeTheme
+import com.example.myapplicationcompose.utils.MonetaryFormatHelper
 import java.util.*
 
 class FormFragment : Fragment() {
     private lateinit var actionButtonState: MutableState<Boolean>
-    private val viewModel by activityViewModels<ContactsViewModel>()
+    private val dataViewModel by activityViewModels<DataViewModel>()
+    private val transferViewModel by activityViewModels<TransferViewModel>()
+    private val contactsViewModel by activityViewModels<ContactsViewModel>()
+    private var validAmount = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,11 +64,18 @@ class FormFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 MyApplicationComposeTheme {
                     actionButtonState = remember { mutableStateOf(false) }
+
                     FormLayout()
                 }
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    dataViewModel.getContactsData(context)
+                }, 3000)
             }
         }
     }
@@ -68,44 +88,57 @@ class FormFragment : Fragment() {
 
     @Composable
     private fun FormLayout() {
-        Column {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
-                BalanceCard()
-                Form()
-            }
+        if (dataViewModel.contactsLiveData.value == null) {
+            InputComponents.Loading()
+        } else {
+            Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    BalanceCard()
+                    Form()
+                }
 
-            Button(
-                enabled = actionButtonState.value,
-                onClick = {
-                    // TODO: ir para a tela de Comprovante
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(24.dp),
-                contentPadding = PaddingValues(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.light_green_2),
-                    contentColor = colorResource(id = R.color.dark_green),
-                    disabledBackgroundColor = colorResource(id = R.color.gray_light_primary),
-                    disabledContentColor = colorResource(id = R.color.gray_dark_primary)
-                )
-            ) {
-                Text(text = "Confirmar", style = BoldSt)
+                Button(
+                    enabled = actionButtonState.value,
+                    onClick = {
+                        findNavController()
+                            .navigate(R.id.action_formFragment_to_successFragment)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    contentPadding = PaddingValues(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.light_green_2),
+                        contentColor = colorResource(id = R.color.dark_green),
+                        disabledBackgroundColor = colorResource(id = R.color.gray_light_primary),
+                        disabledContentColor = colorResource(id = R.color.gray_dark_primary)
+                    )
+                ) {
+                    Text(text = "Confirmar", style = BoldSt)
+                }
             }
         }
     }
 
     @Composable
     private fun BalanceCard() {
-        val balance = "R$ 999.999,00"
-        val today = "00/00/0000"
+        val data = dataViewModel.contactsLiveData.value
+
+        val balance = MonetaryFormatHelper.format(data?.balance, true)
+        val today = Calendar.getInstance().run {
+            val day = get(Calendar.DAY_OF_MONTH).padZero(2)
+            val month = get(Calendar.MONTH).padZero(2)
+            val year = get(Calendar.YEAR).padZero(4)
+
+            "$day/$month/$year"
+        }
 
         Column(
             modifier = Modifier
@@ -152,40 +185,57 @@ class FormFragment : Fragment() {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
+            transferViewModel.amountValidator = InputValidator.Builder()
+                .setRequired(true, "Campo obrigatório.")
+                .addCustomValidation("Digite pelo menos três dígitos.") { text ->
+                    text.length >= 3
+                }
+                .addCustomValidation("Digite no máximo 5 dígitos.") { text ->
+                    text.length <= 5
+                }
+                .setOnValidationCallback {
+                    validAmount = it
+                    validateButton()
+                }
+                .build()
+
             InputComponents.AppInput(
-                title = "Valor da transferência",
+                title = stringResource(R.string.label_transfer_amount),
+                text = transferViewModel.amount,
                 placeholder = "Digite a quantidade",
                 trailingIcon = R.drawable.ic_baseline_attach_money_24,
                 inputOptions = InputComponents.InputOptions(
                     keyboardType = KeyboardType.NumberPassword,
                     validatorDelay = 0,
-                    validator = InputValidator.Builder()
-                        .setRequired(true, "Campo obrigatório.")
-                        .addCustomValidation("Digite pelo menos três dígitos.") { text ->
-                            text.length >= 3
-                        }
-                        .addCustomValidation("Digite no máximo 5 dígitos.") { text ->
-                            text.length <= 5
-                        }
-                        .setOnValidationCallback { valid ->
-                            actionButtonState.value = valid
-                        }
-                        .build(),
-                    pattern = Regex("^\\d+$")),
+                    validator = transferViewModel.amountValidator,
+                    pattern = Regex("^\\d+$")
+                ),
             )
 
             InputComponents.AppInputSelectable(
                 title = "Transferir para",
-                text = viewModel.selectedContact.value,
+                text = contactsViewModel.selectedContact.value,
                 placeholder = "Toque para selecionar o contato",
                 trailingIcon = R.drawable.ic_baseline_account_circle_24
             ) {
                 findNavController().navigate(R.id.action_formFragment_to_contactsFragment)
             }
 
-            val checkedState: MutableState<Boolean> = remember { mutableStateOf(false) }
+            val checkedState: MutableState<Boolean> = remember { transferViewModel.scheduleState }
             Row(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .toggleable(
+                        value = checkedState.value,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onValueChange = {
+                            checkedState.value = it
+                            validateButton()
+                        }
+                    )
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -193,14 +243,15 @@ class FormFragment : Fragment() {
                     style = BookSm.copy(color = colorResource(id = R.color.primary_text)),
                     modifier = Modifier.weight(1f)
                 )
+
                 Switch(
                     checked = checkedState.value,
-                    onCheckedChange = { checkedState.value = it }
+                    onCheckedChange = null
                 )
             }
 
-            var transferDate: String by remember { mutableStateOf("") }
             var calendar: Calendar by remember { mutableStateOf(Calendar.getInstance()) }
+            var transferDate: String by remember { transferViewModel.transferDate }
 
             InputComponents.AppInputSelectable(
                 visible = checkedState.value,
@@ -209,7 +260,7 @@ class FormFragment : Fragment() {
                 placeholder = "Toque para escolher a data",
                 trailingIcon = R.drawable.ic_baseline_today_24
             ) {
-                DatePickerDialog(
+                val composableDatePicker = DatePickerDialog(
                     context,
                     { _: DatePicker, y: Int, m: Int, d: Int ->
                         calendar = Calendar.getInstance().apply {
@@ -219,12 +270,30 @@ class FormFragment : Fragment() {
                         }
                         transferDate =
                             "${d.padZero(2)}/${(m + 1).padZero(2)}/${y.padZero(4)}"
+
+                        validateButton()
                     },
                     calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
                     calendar.get(Calendar.DAY_OF_MONTH)
-                ).show()
+                )
+                composableDatePicker.datePicker.apply {
+                    minDate = Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_MONTH, 1)
+                    }.timeInMillis
+                }
+                composableDatePicker.show()
             }
+        }
+
+        validateButton()
+    }
+
+    private fun validateButton() {
+        transferViewModel.run {
+            actionButtonState.value = validAmount &&
+                    contactsViewModel.selectedContact.value.isNotEmpty() &&
+                    (scheduleState.value && transferDate.value.isNotEmpty() || !scheduleState.value)
         }
     }
 

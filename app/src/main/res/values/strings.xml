@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">My Application Compose</string>
+    <string name="label_transfer_performed">Transferência realizada</string>
+    <string name="label_date_and_time_value">%s/%s/%s às %s:%s</string>
+    <string name="label_transaction_identifier_code">Código identificador da transação</string>
+    <string name="label_transfer_amount">Valor da transferência</string>
+    <string name="label_payer_name">Nome do pagador</string>
+    <string name="label_receiver_name">Nome do recebedor</string>
+    <string name="label_agency">Agência</string>
+    <string name="label_account">Conta corrente</string>
 </resources>

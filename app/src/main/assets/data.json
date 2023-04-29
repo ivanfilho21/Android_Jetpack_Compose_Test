@@ -1,6 +1,7 @@
 {
     "saldo_atual": 32492.81,
     "nome": "Francisco Diógenes Perdão",
+    "dados_bancarios": { "agencia": 913, "conta_corrente": 8130 },
     "meus_contatos": {
         "qtd": 15,
         "lista": [

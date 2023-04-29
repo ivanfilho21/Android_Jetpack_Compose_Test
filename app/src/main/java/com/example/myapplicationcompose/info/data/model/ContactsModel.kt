@@ -6,7 +6,8 @@ object ContactsModel {
     data class Main(
         @SerializedName("saldo_atual") val balance: Double,
         @SerializedName("nome") val fullName: String,
-        @SerializedName("meus_contatos") val myContacts: MyContacts
+        @SerializedName("meus_contatos") val myContacts: MyContacts,
+        @SerializedName("dados_bancarios") val accountData: AccountData
     )
     data class MyContacts(
         @SerializedName("qtd") val size: Int,

@@ -5,8 +5,10 @@ import android.os.Looper
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -35,6 +37,21 @@ object InputComponents {
     )
 
     @Composable
+    fun Loading() {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .progressSemantics()
+                    .size(32.dp),
+                strokeWidth = 3.dp
+            )
+        }
+    }
+
+    @Composable
     fun AppInputSelectable(
         title: String,
         text: String,
@@ -58,7 +75,7 @@ object InputComponents {
     @Composable
     fun AppInput(
         title: String,
-        text: String = "",
+        text: MutableState<String>,
         placeholder: String = "",
         @DrawableRes trailingIcon: Int? = null,
         indicatorColor: Color? = null,
@@ -67,7 +84,7 @@ object InputComponents {
         inputOptions: InputOptions = InputOptions()
     ) {
         TitleAndComponent(title, visible) {
-            var mutableText by remember { mutableStateOf(text) }
+            var mutableText by remember { text }
             val mutableValidator by remember { mutableStateOf(inputOptions.validator) }
             var mutableHelperVisibility by remember { mutableStateOf(false) }
             val strokeColor = indicatorColor ?: colorResource(id = R.color.indicator_color)

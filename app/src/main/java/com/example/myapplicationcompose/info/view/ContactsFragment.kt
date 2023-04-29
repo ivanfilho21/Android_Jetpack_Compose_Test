@@ -1,27 +1,26 @@
 package com.example.myapplicationcompose.info.view
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -29,13 +28,17 @@ import androidx.fragment.app.activityViewModels
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.info.data.model.ContactsModel
 import com.example.myapplicationcompose.info.view_model.ContactsViewModel
+import com.example.myapplicationcompose.info.view_model.DataViewModel
+import com.example.myapplicationcompose.ui.components.InputComponents
 import com.example.myapplicationcompose.ui.components.padZero
 import com.example.myapplicationcompose.ui.theme.BoldSt
 import com.example.myapplicationcompose.ui.theme.BookSt
+import com.example.myapplicationcompose.ui.theme.MyApplicationComposeTheme
 import java.util.*
 
 class ContactsFragment : Fragment() {
-    private val viewModel by activityViewModels<ContactsViewModel>()
+    private val dataViewModel by activityViewModels<DataViewModel>()
+    private val layoutViewModel by activityViewModels<ContactsViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,13 +46,14 @@ class ContactsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
-            setContent {
-                val contactsData = viewModel.contactsLiveData.value
-                ContactList(contactsData)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-                Handler(Looper.getMainLooper()).postDelayed({
-                    viewModel.getContactsData(context)
-                }, 1000)
+            setContent {
+                val contactsData = dataViewModel.contactsLiveData.value
+
+                MyApplicationComposeTheme {
+                    ContactList(contactsData)
+                }
             }
         }
     }
@@ -57,7 +61,7 @@ class ContactsFragment : Fragment() {
     @Composable
     private fun ContactList(data: ContactsModel.Main?) {
         if (data == null) {
-            return Loading()
+            return InputComponents.Loading()
         }
 
         data.myContacts.list.let { contacts: List<ContactsModel.Contact> ->
@@ -70,7 +74,7 @@ class ContactsFragment : Fragment() {
                         val agency = contact.accountData.agency.padZero(4)
                         val account = contact.accountData.account.padZero(5)
                         val contactInfo = "$name, Ag. $agency, Cc. $account"
-                        viewModel.selectedContact.value = contactInfo
+                        layoutViewModel.selectedContact.value = contactInfo
 
                         activity?.onBackPressed()
                     }
@@ -93,9 +97,11 @@ class ContactsFragment : Fragment() {
         }
         Row(
             verticalAlignment = CenterVertically,
-            modifier = Modifier.clickable {
-                onClick(contact)
-            }
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(),
+                onClick = { onClick(contact) }
+            )
         ) {
             Box(
                 contentAlignment = Center,
@@ -136,21 +142,6 @@ class ContactsFragment : Fragment() {
                     )
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun Loading() {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .progressSemantics()
-                    .size(32.dp),
-                strokeWidth = 3.dp
-            )
         }
     }
 
