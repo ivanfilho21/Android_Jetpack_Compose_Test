@@ -33,7 +33,8 @@ object InputComponents {
         val keyboardType: KeyboardType = KeyboardType.Text,
         val validator: InputValidator? = null,
         val validatorDelay: Long = 1000,
-        val pattern: Regex? = null
+        val pattern: Regex? = null,
+        val visualTransformation: VisualTransformation = VisualTransformation.None
     )
 
     @Composable
@@ -93,20 +94,23 @@ object InputComponents {
             BasicTextField(
                 value = mutableText,
                 onValueChange = { value ->
+                    val filtered =
+                        inputOptions.pattern?.let { value.replace(it, "") } ?: value
+
                     mutableValidator?.let { validator ->
                         mutableHelperVisibility = false
 
-                        if (!validator.validate(value)) {
+                        if (!validator.validate(filtered)) {
                             Handler(Looper.getMainLooper()).postDelayed({
                                 mutableHelperVisibility = true
                             }, inputOptions.validatorDelay)
                         }
                     }
 
-                    mutableText = value
+                    mutableText = filtered
                 },
-                visualTransformation = VisualTransformation.None,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = inputOptions.keyboardType),
+                visualTransformation = inputOptions.visualTransformation,
+                keyboardOptions = KeyboardOptions.Default/*.copy(keyboardType = inputOptions.keyboardType)*/,
                 modifier = Modifier.padding(top = 8.dp),
                 textStyle = BookSt.copy(color = colorResource(id = R.color.primary_text)),
                 singleLine = singleLine,

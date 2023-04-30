@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.info.view_model.ContactsViewModel
@@ -43,6 +42,7 @@ import com.example.myapplicationcompose.info.view_model.DataViewModel
 import com.example.myapplicationcompose.info.view_model.TransferViewModel
 import com.example.myapplicationcompose.ui.components.InputComponents
 import com.example.myapplicationcompose.ui.components.InputValidator
+import com.example.myapplicationcompose.ui.components.MonetaryVisualTransformation
 import com.example.myapplicationcompose.ui.components.padZero
 import com.example.myapplicationcompose.ui.theme.BoldSt
 import com.example.myapplicationcompose.ui.theme.BookSm
@@ -75,7 +75,7 @@ class FormFragment : Fragment() {
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     dataViewModel.getContactsData(context)
-                }, 3000)
+                }, /*300*/0)
             }
         }
     }
@@ -206,9 +206,10 @@ class FormFragment : Fragment() {
                 trailingIcon = R.drawable.ic_baseline_attach_money_24,
                 inputOptions = InputComponents.InputOptions(
                     keyboardType = KeyboardType.NumberPassword,
+                    visualTransformation = MonetaryVisualTransformation(),
                     validatorDelay = 0,
                     validator = transferViewModel.amountValidator,
-                    pattern = Regex("^\\d+$")
+                    pattern = "[^\\d]".toRegex()
                 ),
             )
 
