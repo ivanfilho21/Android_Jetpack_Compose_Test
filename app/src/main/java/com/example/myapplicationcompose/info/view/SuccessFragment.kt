@@ -104,7 +104,7 @@ class SuccessFragment : Fragment() {
 
             val calendar = Calendar.getInstance()
             val day = calendar[Calendar.DAY_OF_MONTH].padZero(2)
-            val month = calendar[Calendar.MONTH].padZero(2)
+            val month = (calendar[Calendar.MONTH] + 1).padZero(2)
             val year = calendar[Calendar.YEAR].padZero(4)
             val hour = calendar[Calendar.HOUR_OF_DAY].padZero(2)
             val min = calendar[Calendar.MINUTE].padZero(2)
@@ -176,6 +176,22 @@ class SuccessFragment : Fragment() {
                 Text(text = contactsViewModel.selectedContact.value.run {
                     substring(0, indexOf(','))
                 }, style = textBoldStyle, modifier = textBoldModifier)
+            }
+
+            if (transferViewModel.scheduleState.value) {
+                Row(modifier = rowModifier) {
+                    Text(
+                        text = stringResource(R.string.label_schedule_date),
+                        style = textNormalStyle,
+                        modifier = textNormalModifier
+                    )
+
+                    Text(
+                        text = transferViewModel.transferDate.value,
+                        style = textBoldStyle,
+                        modifier = textBoldModifier
+                    )
+                }
             }
 
             Divider(modifier = Modifier.padding(top = 24.dp))

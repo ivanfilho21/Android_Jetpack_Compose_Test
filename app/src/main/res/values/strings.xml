@@ -8,4 +8,5 @@
     <string name="label_receiver_name">Nome do recebedor</string>
     <string name="label_agency">Agência</string>
     <string name="label_account">Conta corrente</string>
+    <string name="label_schedule_date">Data do agendamento</string>
 </resources>

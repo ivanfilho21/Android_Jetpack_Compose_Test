@@ -37,6 +37,27 @@ object InputComponents {
         val visualTransformation: VisualTransformation = VisualTransformation.None
     )
 
+    data class InputColors(
+        val icon: Color,
+        val indicator: Color,
+        val stroke: Color,
+        val placeholder: Color,
+        val text: Color,
+        val title: Color,
+        val error: Color
+    )
+
+    @Composable
+    fun inputDefaultColors() = InputColors(
+        icon = colorResource(id = R.color.light_green),
+        indicator = colorResource(id = R.color.indicator_color),
+        stroke = colorResource(id = R.color.indicator_color),
+        placeholder = colorResource(id = R.color.placeholder),
+        text = colorResource(id = R.color.secondary_text),
+        title = colorResource(id = R.color.primary_text),
+        error = colorResource(id = R.color.dark_red)
+    )
+
     @Composable
     fun Loading() {
         Column(
@@ -58,18 +79,14 @@ object InputComponents {
         text: String,
         placeholder: String = "",
         @DrawableRes trailingIcon: Int? = null,
-        indicatorColor: Color? = null,
+        colors: InputColors = inputDefaultColors(),
         visible: Boolean = true,
         onClickCallback: () -> Unit
     ) {
-        TitleAndComponent(title, visible) {
-            val strokeColor = indicatorColor ?: colorResource(id = R.color.indicator_color)
-            InputDecorationBox(text, placeholder, trailingIcon, strokeColor, {
-                Text(
-                    text = text,
-                    style = BookSt.copy(color = colorResource(id = R.color.primary_text))
-                )
-            }, onClickCallback)
+        TitleAndComponent(title, colors.title, visible) {
+            InputDecorationBox(text, placeholder, trailingIcon, {
+                Text(text = text, style = BookSt.copy(color = colors.text))
+            }, colors, onClickCallback)
         }
     }
 
@@ -79,16 +96,15 @@ object InputComponents {
         text: MutableState<String>,
         placeholder: String = "",
         @DrawableRes trailingIcon: Int? = null,
-        indicatorColor: Color? = null,
         singleLine: Boolean = true,
         visible: Boolean = true,
-        inputOptions: InputOptions = InputOptions()
+        inputOptions: InputOptions = InputOptions(),
+        colors: InputColors = inputDefaultColors()
     ) {
-        TitleAndComponent(title, visible) {
+        TitleAndComponent(title, colors.title, visible) {
             var mutableText by remember { text }
             val mutableValidator by remember { mutableStateOf(inputOptions.validator) }
             var mutableHelperVisibility by remember { mutableStateOf(false) }
-            val strokeColor = indicatorColor ?: colorResource(id = R.color.indicator_color)
 
             // Basic Text Field
             BasicTextField(
@@ -112,16 +128,16 @@ object InputComponents {
                 visualTransformation = inputOptions.visualTransformation,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = inputOptions.keyboardType),
                 modifier = Modifier.padding(top = 8.dp),
-                textStyle = BookSt.copy(color = colorResource(id = R.color.primary_text)),
+                textStyle = BookSt.copy(color = colors.text),
                 singleLine = singleLine,
-                cursorBrush = SolidColor(strokeColor),
+                cursorBrush = SolidColor(colors.indicator),
                 decorationBox = { innerTextField ->
                     InputDecorationBox(
                         mutableText,
                         placeholder,
                         trailingIcon,
-                        strokeColor,
-                        innerTextField
+                        innerTextField,
+                        colors
                     )
                 }
             )
@@ -138,9 +154,7 @@ object InputComponents {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                style = BookSm.copy(
-                    color = colorResource(id = R.color.dark_red)
-                )
+                style = BookSm.copy(color = colors.error)
             )
         }
     }
@@ -150,8 +164,8 @@ object InputComponents {
         text: String = "",
         placeholder: String = "",
         @DrawableRes trailingIcon: Int? = null,
-        strokeColor: Color,
         innerTextField: (@Composable () -> Unit),
+        colors: InputColors,
         onClickCallback: (() -> Unit)? = null
     ) {
         var rowModifier = Modifier
@@ -166,7 +180,7 @@ object InputComponents {
                 val width = size.width
                 val height = size.height - borderSize / 2
                 drawLine(
-                    color = strokeColor,
+                    color = colors.stroke,
                     start = Offset(0f, height),
                     end = Offset(width, height),
                     strokeWidth = borderSize
@@ -192,7 +206,7 @@ object InputComponents {
                 if (text.isEmpty()) {
                     Text(
                         text = placeholder,
-                        style = BookSt.copy(color = colorResource(id = R.color.placeholder)),
+                        style = BookSt.copy(color = colors.placeholder),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -208,7 +222,7 @@ object InputComponents {
                     painter = painterResource(id = iconResId),
                     contentDescription = "",
                     modifier = Modifier.size(24.dp),
-                    tint = colorResource(id = R.color.light_green)
+                    tint = colors.icon
                 )
             }
         }
@@ -217,6 +231,7 @@ object InputComponents {
     @Composable
     private fun TitleAndComponent(
         title: String,
+        color: Color,
         visible: Boolean = true,
         component: (@Composable () -> Unit)
     ) {
@@ -231,9 +246,7 @@ object InputComponents {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp),
-                style = BoldSm.copy(
-                    color = colorResource(id = R.color.primary_text)
-                ),
+                style = BoldSm.copy(color = color),
             )
 
             // Component
