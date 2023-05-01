@@ -110,7 +110,7 @@ object InputComponents {
                     mutableText = filtered
                 },
                 visualTransformation = inputOptions.visualTransformation,
-                keyboardOptions = KeyboardOptions.Default/*.copy(keyboardType = inputOptions.keyboardType)*/,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = inputOptions.keyboardType),
                 modifier = Modifier.padding(top = 8.dp),
                 textStyle = BookSt.copy(color = colorResource(id = R.color.primary_text)),
                 singleLine = singleLine,

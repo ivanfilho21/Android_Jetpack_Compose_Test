@@ -37,6 +37,7 @@ import com.example.myapplicationcompose.ui.theme.BoldSm
 import com.example.myapplicationcompose.ui.theme.BoldSt
 import com.example.myapplicationcompose.ui.theme.BookSm
 import com.example.myapplicationcompose.ui.theme.MyApplicationComposeTheme
+import com.example.myapplicationcompose.utils.MonetaryFormatHelper
 import java.util.*
 
 class SuccessFragment : Fragment() {
@@ -156,7 +157,10 @@ class SuccessFragment : Fragment() {
                 )
 
                 Text(
-                    text = "R$ " + transferViewModel.amount.value,
+                    text = MonetaryFormatHelper.format(
+                        transferViewModel.amount.value.toDouble() / 100,
+                        true
+                    ),
                     style = textBoldStyle,
                     modifier = textBoldModifier
                 )

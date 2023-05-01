@@ -25,6 +25,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.myapplicationcompose.R
 import com.example.myapplicationcompose.info.data.model.ContactsModel
 import com.example.myapplicationcompose.info.view_model.ContactsViewModel
@@ -76,7 +77,7 @@ class ContactsFragment : Fragment() {
                         val contactInfo = "$name, Ag. $agency, Cc. $account"
                         layoutViewModel.selectedContact.value = contactInfo
 
-                        activity?.onBackPressed()
+                        findNavController().navigateUp()
                     }
                     Divider()
                 })

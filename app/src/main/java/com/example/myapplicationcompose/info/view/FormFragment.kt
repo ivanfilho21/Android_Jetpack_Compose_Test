@@ -187,11 +187,14 @@ class FormFragment : Fragment() {
         ) {
             transferViewModel.amountValidator = InputValidator.Builder()
                 .setRequired(true, "Campo obrigatório.")
-                .addCustomValidation("Digite pelo menos três dígitos.") { text ->
-                    text.length >= 3
+                .addCustomValidation("Digite um valor maior que zero.") { text ->
+                    val amount = text.toDouble() / 100
+                    amount > 0.0
                 }
-                .addCustomValidation("Digite no máximo 5 dígitos.") { text ->
-                    text.length <= 5
+                .addCustomValidation("O valor digitado é maior que o seu saldo.") { text ->
+                    val amount = text.toDouble() / 100
+                    val balance = dataViewModel.contactsLiveData.value?.balance ?: 0.0
+                    amount <= balance
                 }
                 .setOnValidationCallback {
                     validAmount = it
